@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AVAX to CHF Calculator</title>
+</head>
+<body>
+  <h1>AVAX to CHF Conversion</h1>
+  <p id="avax-price">Loading AVAX price...</p>
+  <p id="exchange-rate">Loading Exchange Rate...</p>
+  <p id="total-chf">Total in CHF: Loading...</p>
+
+  <script>
+    // Function to fetch AVAX price in USD
+    async function getAvaxPrice() {
+      const url = "https://api.coinpaprika.com/v1/tickers/avax-avalanche?quotes=USD";
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        const avaxPrice = data.quotes.USD.price;
+        return avaxPrice;
+      } catch (error) {
+        console.error("Error fetching AVAX price:", error);
+        return null;
+      }
+    }
+
+    // Function to fetch exchange rate USD to CHF
+    async function getExchangeRate() {
+      const url = "https://api.exchangerate-api.com/v4/latest/USD";
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        const rate = data.rates.CHF;
+        return rate;
+      } catch (error) {
+        console.error("Error fetching exchange rate:", error);
+        return null;
+      }
+    }
+
+    // Fetch and display the AVAX price and exchange rate
+    async function updatePrices() {
+      const avaxPrice = await getAvaxPrice();
+      const exchangeRate = await getExchangeRate();
+
+      if (avaxPrice && exchangeRate) {
+        document.getElementById("avax-price").textContent = `AVAX: $${avaxPrice.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}`;
+        document.getElementById("exchange-rate").textContent = `CHF/USD: $${exchangeRate.toFixed(2)}`;
+        
+        const totalCHF = (1130 * avaxPrice) * exchangeRate;
+        document.getElementById("total-chf").textContent = `Total CHF: ${totalCHF.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}`;
+      } else {
+        document.getElementById("avax-price").textContent = "Error fetching AVAX price.";
+        document.getElementById("exchange-rate").textContent = "Error fetching exchange rate.";
+      }
+    }
+
+    // Run the function when the page loads
+    window.onload = updatePrices;
+  </script>
+</body>
+</html>
