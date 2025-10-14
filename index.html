@@ -3,25 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Latitude and Longitude</title>
+    <title>Coordinates & Number 1</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f4f4f9;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #output {
+            white-space: pre-wrap; /* Ensures line breaks are preserved */
+            font-size: 18px;
+            text-align: center;
+            padding: 15px;
+            border: 1px solid #ccc;
+            background-color: white;
+            border-radius: 5px;
+            min-height: 60px; /* Gives it space even when empty */
+        }
+    </style>
 </head>
 <body>
-    <h1>Your Location</h1>
-    <p id="location"></p>
+
+    <button id="actionButton">Get Text & Copy</button>
+
+    <div id="output">Click the button to generate and copy the text.</div>
 
     <script>
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const lat = position.coords.latitude;
-                    const lon = position.coords.longitude;
-                    document.getElementById("location").innerHTML = `Latitude: ${lat}, Longitude: ${lon}`;
-                },
-                (error) => console.error('Error:', error)
-            );
-        } else {
-            console.log('Geolocation is not supported by this browser.');
-        }
+        // The specific text you requested
+        const TEXT_TO_COPY = `48.550951\n8.6231126\n1`;
+
+        document.getElementById('actionButton').addEventListener('click', () => {
+            const outputElement = document.getElementById('output');
+            
+            // 1. Write the text on the site
+            outputElement.innerText = TEXT_TO_COPY;
+
+            // 2. Copy the text to the clipboard
+            navigator.clipboard.writeText(TEXT_TO_COPY)
+                .then(() => {
+                    // Update the output to show success
+                    outputElement.innerHTML = `
+                        Successfully copied to clipboard! ✅<br><br>
+                        ${TEXT_TO_COPY.replace(/\n/g, '<br>')}
+                    `;
+                })
+                .catch(err => {
+                    // Handle potential errors (e.g., if not running on a secure context or permission denied)
+                    console.error('Could not copy text: ', err);
+                    outputElement.innerText = `Failed to copy: ${err.message}. Text is:\n${TEXT_TO_COPY}`;
+                });
+        });
     </script>
+
 </body>
 </html>
