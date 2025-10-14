@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coordinates & Number 1</title>
+    <title>Live Coordinates & Number 1</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -19,7 +19,7 @@
             padding: 10px 20px;
             font-size: 16px;
             cursor: pointer;
-            background-color: #007bff;
+            background-color: #28a745; /* Changed color to green for a 'live' feel */
             color: white;
             border: none;
             border-radius: 5px;
@@ -27,50 +27,94 @@
             transition: background-color 0.3s;
         }
         button:hover {
-            background-color: #0056b3;
+            background-color: #1e7e34;
         }
         #output {
-            white-space: pre-wrap; /* Ensures line breaks are preserved */
+            white-space: pre-wrap;
             font-size: 18px;
             text-align: center;
             padding: 15px;
             border: 1px solid #ccc;
             background-color: white;
             border-radius: 5px;
-            min-height: 60px; /* Gives it space even when empty */
+            min-height: 60px;
+            width: 80%;
+            max-width: 400px;
         }
     </style>
 </head>
 <body>
 
-    <button id="actionButton">Get Text & Copy</button>
+    <h1>Your Location Data</h1>
+    <button id="actionButton">Get My Location & Copy</button>
 
-    <div id="output">Click the button to generate and copy the text.</div>
+    <div id="output">Click the button to get your real-time coordinates. (You will be asked for permission)</div>
 
     <script>
-        // The specific text you requested
-        const TEXT_TO_COPY = `48.550951\n8.6231126\n1`;
-
         document.getElementById('actionButton').addEventListener('click', () => {
             const outputElement = document.getElementById('output');
-            
-            // 1. Write the text on the site
-            outputElement.innerText = TEXT_TO_COPY;
+            outputElement.innerText = 'Getting location... Please wait and approve permission.';
 
-            // 2. Copy the text to the clipboard
-            navigator.clipboard.writeText(TEXT_TO_COPY)
-                .then(() => {
-                    // Update the output to show success
+            // Check if the Geolocation API is available
+            if (!navigator.geolocation) {
+                outputElement.innerText = 'Geolocation is not supported by your browser.';
+                return;
+            }
+
+            // Get the current position
+            navigator.geolocation.getCurrentPosition(
+                // Success function
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    const numberOne = 1;
+
+                    // 1. Format the text as requested
+                    const textToCopy = `${lat}\n${lon}\n${numberOne}`;
+
+                    // 2. Write the text on the site
                     outputElement.innerHTML = `
                         Successfully copied to clipboard! ✅<br><br>
-                        ${TEXT_TO_COPY.replace(/\n/g, '<br>')}
+                        ${textToCopy.replace(/\n/g, '<br>')}
                     `;
-                })
-                .catch(err => {
-                    // Handle potential errors (e.g., if not running on a secure context or permission denied)
-                    console.error('Could not copy text: ', err);
-                    outputElement.innerText = `Failed to copy: ${err.message}. Text is:\n${TEXT_TO_COPY}`;
-                });
+
+                    // 3. Copy the text to the clipboard
+                    navigator.clipboard.writeText(textToCopy)
+                        .then(() => {
+                            // Already handled the success message above
+                        })
+                        .catch(err => {
+                            console.error('Could not copy text: ', err);
+                            outputElement.innerHTML += `<br><br>Failed to copy to clipboard.`;
+                        });
+                },
+                // Error function
+                (error) => {
+                    let errorMessage;
+                    switch (error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMessage = "Location access denied. Please allow it in your browser settings.";
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage = "Location information is unavailable.";
+                            break;
+                        case error.TIMEOUT:
+                            errorMessage = "The request to get user location timed out.";
+                            break;
+                        default:
+                            errorMessage = "An unknown error occurred while getting location.";
+                            break;
+                    }
+                    outputElement.innerText = `Error: ${errorMessage}`;
+                    console.error('Geolocation Error:', error);
+                },
+                // Options (optional)
+                {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0
+                }
+            );
         });
     </script>
 
